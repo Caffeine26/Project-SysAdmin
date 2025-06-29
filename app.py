@@ -1,10 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+import os
 
 app = Flask(__name__)
 
-# /// = relative path, //// = absolute path
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI', 'mysql+pymysql://todo_user:123@localhost/flask_todo')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -45,6 +45,8 @@ def delete(todo_id):
     db.session.commit()
     return redirect(url_for("home"))
 
-if __name__ == "__main__":
+with app.app_context():
     db.create_all()
+
+if __name__ == "__main__":
     app.run(debug=True)

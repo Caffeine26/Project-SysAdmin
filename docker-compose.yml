@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      - SQLALCHEMY_DATABASE_URI=mysql+pymysql://todo_user:123@db:3306/flask_todo
+    volumes:
+      - .:/app
+    container_name: flask-todo-web
+    networks:
+      - todo-network
+
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: flask_todo
+      MYSQL_USER: todo_user
+      MYSQL_PASSWORD: 123
+      MYSQL_ROOT_PASSWORD: 123
+    volumes:
+      - dbdata:/var/lib/mysql
+    container_name: flask-todo-db
+    networks:
+      - todo-network
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"  
+    volumes:
+      - ./nginx:/etc/nginx/conf.d:ro    
+    depends_on:
+      - web
+    container_name: flask-todo-nginx
+    networks:
+      - todo-network
+
+volumes:
+  dbdata:
+
+networks:
+  todo-network:
+    driver: bridge
